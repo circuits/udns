@@ -1,0 +1,8 @@
+dnslib
+cachetools
+
+# Development version of redisco
+-e git+https://github.com/kiddouk/redisco.git#egg=redisco
+
+# Development version of circuits
+-e hg+https://bitbucket.org/circuits/circuits#egg=circuits
