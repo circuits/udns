@@ -1,4 +1,10 @@
+redis:
+    image: redis
+    name: redis
+
 minidns:
     build: .
+    links:
+        - "redis:redis"
     ports:
-     - "53:53/udp"
+        - "53:53/udp"

@@ -7,7 +7,7 @@ MAINTAINER James Mills, prologic at shortcircuit dot net dot au
 EXPOSE 53/udp
 
 # Startup
-CMD ["/app/server.py"]
+CMD ["/app/server.py", "--debug"]
 
 # Build/Runtime Dependencies
 ADD requirements.txt /tmp/requirements.txt
