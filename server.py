@@ -165,11 +165,14 @@ class Server(Component):
                 )
             )
 
-            record = records[0]
-            reply = request.reply()
-            reply.add_answer(record.rr)
+            for record in records:
+                reply = request.reply()
+                reply.add_answer(record.rr)
+
             self.cache[key] = reply
+
             self.fire(write(peer, reply.pack()))
+
             return
 
         self.logger.info(
