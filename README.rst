@@ -8,9 +8,12 @@
 udns
 ====
 
-charla is `Spanish for chat <http://www.spanishcentral.com/translate/charla>`_
-and is an IRC Server and Daemon written in `Python`_ using the `circuits`_
-Application Framework.
+udns is an authoritative, caching dns server for development and small
+deployments writtein in `Python`_ using the `circuits`_ Application Framework
+and the `dnslib`_ DNS library. udns can be run standalone, via `Docker`_
+or using the `fig`_ tool. udns is designed to be small, lightweight, fast
+and flexible. udns fully supports forwarding, caching as well as honouring
+ttls.
 
 
 Installation and Usage
@@ -18,21 +21,25 @@ Installation and Usage
 
 From Source::
     
-    $ hg clone https://bitbucket.org/circuits/charla
-    $ cd charla
-    $ ./server.py
+    $ hg clone https://bitbucket.org/circuits/udns
+    $ cd udns
+    $ python setup.py develop
+    $ sudo udnsd --debug  # Server
+    $ udnsc --help        # Client
 
 From Source using `fig`_ and `Docker`_::
     
-    $ hg clone https://bitbucket.org/circuits/charla
-    $ cd charla
-    $ fig up
+    $ hg clone https://bitbucket.org/circuits/udns
+    $ cd udns
+    $ fig up                   # Server
+    $ fig run --rm udns udnsc  # Client
 
 Using `Docker`_::
     
-    $ docker run -d 6667:6667 prologic/charla
+    $ docker run -d -p 53:53/udp prologic/udns
 
 From PyPi (*ccoming soon*)::
     
-    $ pip install charla
-    $ charla
+    $ pip install udns
+    $ udnsd  # Server
+    $ udnsc  # Client

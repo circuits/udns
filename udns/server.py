@@ -318,7 +318,7 @@ def parse_args():
     )
 
     add(
-        "--pidfile", action="store", default="charla.pid",
+        "--pidfile", action="store", default="udns.pid",
         dest="pidfile", metavar="FILE", type=str,
         help="write process id to FILE"
     )
