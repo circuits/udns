@@ -147,9 +147,8 @@ class Server(Component):
                 )
             )
 
-            reply = request.reply()
-            for rr in self.cache[key]:
-                reply.add_answer(rr)
+            reply = self.cache[key]
+            reply.header.id = request.header.id
             self.fire(write(peer, reply.pack()))
             return
 
@@ -165,8 +164,8 @@ class Server(Component):
                 )
             )
 
+            reply = request.reply()
             for record in records:
-                reply = request.reply()
                 reply.add_answer(record.rr)
 
             self.cache[key] = reply
@@ -216,7 +215,7 @@ class Server(Component):
             rr.rname = qname
             reply.add_answer(rr)
 
-        self.cache[key] = reply.rr
+        self.cache[key] = reply
 
         self.fire(write(peer, reply.pack()))
 
