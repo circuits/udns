@@ -1,5 +1,8 @@
-dnslib
 cachetools
+hiredis>0.1.1
+
+# Development version of dnslib
+-e hg+https://bitbucket.org/prologic/dnslib#egg=dnslib
 
 # Development version of redisco
 -e git+https://github.com/kiddouk/redisco.git#egg=redisco

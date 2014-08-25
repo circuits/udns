@@ -6,14 +6,21 @@ from __future__ import print_function
 
 import sys
 import logging
+from time import sleep
 from os import environ
 from logging import getLogger
+from socket import AF_INET, SOCK_STREAM, socket
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 from cachetools import LRUCache
-from dnslib import CLASS, QR, QTYPE
+
 from dnslib import DNSQuestion, DNSRecord
+from dnslib import CLASS, QR, QTYPE, RDMAP, RR
+
+from redisco.models import Model
+from redisco import connection_setup, get_client
+from redisco.models import Attribute, IntegerField, ListField
 
 
 from circuits.net.events import write
@@ -24,16 +31,72 @@ from circuits import Component, Debugger, Event
 __version__ = "0.0.1"
 
 
-class lookup(Event):
-    """lookup Event"""
-
-
 class request(Event):
     """request Event"""
 
 
 class response(Event):
     """response Event"""
+
+
+class Zone(Model):
+
+    name = Attribute(required=True, unique=True)
+    ttl = IntegerField(default=0)
+    records = ListField("Record")
+
+    def delete(self):
+        for record in self.records:
+            record.delete()
+        super(Zone, self).delete()
+
+    def add_record(self, rname, rdata, rclass=CLASS.IN, rtype=QTYPE.A):
+        record = Record(
+            rname="{0:s}.{1:s}".format(rname, self.name), rdata=rdata,
+            ttl=self.ttl, rtype=rtype, rclass=rclass
+        )
+        record.save()
+        self.records.append(record)
+        self.save()
+
+    def delete_record(self, rname):
+        fullname = "{0:s}.{1:s}".format(rname, self.name)
+        records = [
+            (i, record)
+            for i, record in enumerate(self.records)
+            if record.rname == fullname
+        ]
+
+        if not records:
+            return
+
+        i, record = records[0]
+        record.delete()
+
+        del self.records[i]
+        self.save()
+
+    class Meta:
+        indicies = ("id", "name",)
+
+
+class Record(Model):
+
+    rname = Attribute(required=True)
+    rdata = Attribute(required=True)
+
+    ttl = IntegerField(default=0)
+
+    rclass = IntegerField(default=CLASS.IN)
+    rtype = IntegerField(default=QTYPE.A)
+
+    @property
+    def rr(self):
+        rdata = RDMAP[QTYPE[self.rtype]](self.rdata)
+        return RR(self.rname, self.rtype, self.rclass, self.ttl, rdata)
+
+    class Meta:
+        indicies = ("id", "rname", "rclass", "rtype", "ttl", "rdata",)
 
 
 class DNS(Component):
@@ -46,8 +109,10 @@ class DNS(Component):
 
 class Server(Component):
 
-    def init(self, args, logger):
+    def init(self, args, db, logger):
         self.args = args
+        self.db = db
+
         self.logger = logger
 
         self.bind = args.bind
@@ -68,63 +133,79 @@ class Server(Component):
             "DNS Server Ready! Listening on {0:s}:{1:d}".format(*bind)
         )
 
-    def lookup(self, qname, qclass="IN", qtype="A"):
-        request = DNSRecord(
-            q=DNSQuestion(
-                qname,
-                qclass=getattr(CLASS, qclass),
-                qtype=getattr(QTYPE, qtype)
-            )
-        )
-
-        self.fire(write((self.forward, 53), request.pack()))
-
     def request(self, peer, request):
         qname = request.q.qname
-        qtype = QTYPE[request.q.qtype]
-        qclass = CLASS[request.q.qclass]
+        qtype = request.q.qtype
+        qclass = request.q.qclass
 
         key = (qname, qtype, qclass)
         if key in self.cache:
             self.logger.info(
                 "Cached Request ({0:s}): {1:s} {2:s} {3:s}".format(
-                    "{0:s}:{1:d}".format(*peer), qclass, qtype, qname
+                    "{0:s}:{1:d}".format(*peer),
+                    CLASS.get(qclass), QTYPE.get(qtype), qname
                 )
             )
 
-            reply = self.cache[key]
-            reply.header.id = request.header.id
+            reply = request.reply()
+            for rr in self.cache[key]:
+                reply.add_answer(rr)
+            self.fire(write(peer, reply.pack()))
+            return
+
+        records = Record.objects.filter(
+            rname=qname, rclass=qclass, rtype=qtype
+        )
+
+        if records:
+            self.logger.info(
+                "Authoritative Request ({0:s}): {1:s} {2:s} {3:s}".format(
+                    "{0:s}:{1:d}".format(*peer),
+                    CLASS.get(qclass), QTYPE.get(qtype), qname
+                )
+            )
+
+            record = records[0]
+            reply = request.reply()
+            reply.add_answer(record.rr)
+            self.cache[key] = reply
             self.fire(write(peer, reply.pack()))
             return
 
         self.logger.info(
             "Request ({0:s}): {1:s} {2:s} {3:s}".format(
-                "{0:s}:{1:d}".format(*peer), qclass, qtype, qname
+                "{0:s}:{1:d}".format(*peer),
+                CLASS.get(qclass), QTYPE.get(qtype), qname
             )
         )
 
-        self.peers[key] = peer
-        self.requests[key] = request
+        lookup = DNSRecord(q=DNSQuestion(qname, qclass, qtype))
+        id = lookup.header.id
+        self.peers[id] = peer
+        self.requests[id] = request
 
-        self.fire(lookup(qname, qclass=qclass, qtype=qtype))
+        self.fire(write((self.forward, 53), lookup.pack()))
 
     def response(self, peer, response):
+        id = response.header.id
         qname = response.q.qname
-        qtype = QTYPE[response.q.qtype]
-        qclass = CLASS[response.q.qclass]
+        qtype = response.q.qtype
+        qclass = response.q.qclass
 
-        key = (qname, qtype, qclass)
-        if key not in self.peers:
+        if id not in self.peers:
             self.logger.info(
                 "Unknown Response ({0:s}): {1:s} {2:s} {3:s}".format(
-                    "{0:s}:{1:d}".format(*peer), qclass, qtype, qname
+                    "{0:s}:{1:d}".format(*peer),
+                    CLASS.get(qclass), QTYPE.get(qtype), qname
                 )
             )
 
             return
 
-        peer = self.peers[key]
-        request = self.requests[key]
+        peer = self.peers[id]
+        request = self.requests[id]
+
+        key = (request.q.qname, request.q.qtype, request.q.qclass)
 
         reply = request.reply()
 
@@ -132,13 +213,41 @@ class Server(Component):
             rr.rname = qname
             reply.add_answer(rr)
 
-        reply.pack()
-        self.cache[key] = reply
+        self.cache[key] = reply.rr
 
         self.fire(write(peer, reply.pack()))
 
-        del self.peers[key]
-        del self.requests[key]
+        del self.peers[id]
+        del self.requests[id]
+
+
+def waitfor(address, port, timeout=10):
+    sock = socket(AF_INET, SOCK_STREAM)
+    while not sock.connect_ex((address, port)) == 0 and timeout:
+        sleep(1)
+
+
+def setup_database(args, logger):
+    dbhost = args.dbhost
+    dbport = args.dbport
+
+    logger.debug(
+        "Waiting for Redis Service on {0:s}:{1:d} ...".format(dbhost, dbport)
+    )
+
+    waitfor(dbhost, dbport)
+
+    logger.debug(
+        "Connecting to Redis on {0:s}:{1:d} ...".format(dbhost, dbport)
+    )
+
+    connection_setup(host=dbhost, port=dbport)
+
+    logger.debug("Success!")
+
+    db = get_client()
+
+    return db
 
 
 def setup_logging(args):
@@ -228,7 +337,9 @@ def main():
 
     logger = setup_logging(args)
 
-    Server(args, logger).run()
+    db = setup_database(args, logger)
+
+    Server(args, db, logger).run()
 
 
 if __name__ == "__main__":
