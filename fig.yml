@@ -2,7 +2,7 @@ redis:
     image: redis
     name: redis
 
-minidns:
+udns:
     build: .
     links:
         - "redis:redis"

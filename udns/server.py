@@ -147,7 +147,7 @@ class Server(Component):
         for k, rrs in self.cache.items():
             for rr in rrs[:]:
                 rr.ttl -= 1
-                if not rr.ttl:
+                if rr.ttl <= 0:
                     rrs.remove(rr)
                     if not rrs:
                         del self.cache[k]

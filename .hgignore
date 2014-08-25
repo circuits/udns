@@ -4,3 +4,4 @@ log
 dist
 build
 *.pyc
+*.egg-info
