@@ -25,7 +25,7 @@ from redisco.models import Attribute, IntegerField, ListField
 
 from circuits.net.events import write
 from circuits.net.sockets import UDPServer
-from circuits import Component, Debugger, Event
+from circuits import Component, Debugger, Event, Timer
 
 
 __version__ = "0.0.1"
@@ -50,10 +50,18 @@ class Zone(Model):
             record.delete()
         super(Zone, self).delete()
 
-    def add_record(self, rname, rdata, rclass=CLASS.IN, rtype=QTYPE.A):
+    def add_record(self, rname, rdata, **options):
+        rclass = options.get("rclass", CLASS.IN)
+        rtype = options.get("rtype", QTYPE.A)
+        ttl = options.get("ttl", self.ttl)
+
+        rclass = rclass if rclass is not None else CLASS.IN
+        rtype = rtype if rtype is not None else QTYPE.A
+        ttl = ttl if ttl is not None else self.ttl
+
         record = Record(
             rname="{0:s}.{1:s}".format(rname, self.name), rdata=rdata,
-            ttl=self.ttl, rtype=rtype, rclass=rclass
+            ttl=ttl, rtype=rtype, rclass=rclass
         )
         record.save()
         self.records.append(record)
@@ -133,6 +141,17 @@ class Server(Component):
             "DNS Server Ready! Listening on {0:s}:{1:d}".format(*bind)
         )
 
+        Timer(1, Event.create("ttl"), persist=True).register(self)
+
+    def ttl(self):
+        for k, rrs in self.cache.items():
+            for rr in rrs[:]:
+                rr.ttl -= 1
+                if not rr.ttl:
+                    rrs.remove(rr)
+                    if not rrs:
+                        del self.cache[k]
+
     def request(self, peer, request):
         qname = request.q.qname
         qtype = request.q.qtype
@@ -147,8 +166,9 @@ class Server(Component):
                 )
             )
 
-            reply = self.cache[key]
-            reply.header.id = request.header.id
+            reply = request.reply()
+            for rr in self.cache[key]:
+                reply.add_answer(rr)
             self.fire(write(peer, reply.pack()))
             return
 
@@ -164,11 +184,11 @@ class Server(Component):
                 )
             )
 
+            rr = [record.rr for record in records]
             reply = request.reply()
-            for record in records:
-                reply.add_answer(record.rr)
+            reply.add_answer(*rr)
 
-            self.cache[key] = reply
+            self.cache[key] = rr
 
             self.fire(write(peer, reply.pack()))
 
@@ -215,7 +235,7 @@ class Server(Component):
             rr.rname = qname
             reply.add_answer(rr)
 
-        self.cache[key] = reply
+        self.cache[key] = reply.rr
 
         self.fire(write(peer, reply.pack()))
 

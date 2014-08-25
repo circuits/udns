@@ -19,31 +19,41 @@ from server import Zone
 __version__ = "0.0.1"
 
 
+def create(args):
+    zone = Zone.objects.filter(name=args.zone).first()
+
+    if zone:
+        print("Zone {0:s} already exists!".format(args.zone))
+        raise SystemExit(1)
+
+    zone = Zone(name=args.zone, ttl=args.ttl)
+    zone.save()
+
+
 def add(args):
-    zones = Zone.objects.filter(name=args.zone)
+    zone = Zone.objects.filter(name=args.zone).first()
 
-    if zones:
-        zone = zones[0]
-    else:
-        zone = Zone(name=args.zone)
-        zone.save()
-
-    if args.rname and args.rdata:
-        zone.add_record(
-            args.rname, args.rdata,
-            rclass=getattr(CLASS, args.rclass),
-            rtype=getattr(QTYPE, args.rtype)
-        )
-
-
-def delete(args):
-    zones = Zone.objects.filter(name=args.zone)
-
-    if not zones:
+    if not zone:
         print("Zone {0:s} not found!".format(args.zone))
         raise SystemExit(1)
 
-    zone = zones[0]
+    if args.rname and args.rdata:
+        zone.add_record(
+            args.rname, args.rdata, ttl=args.ttl,
+            rclass=getattr(CLASS, args.rclass),
+            rtype=getattr(QTYPE, args.rtype)
+        )
+    elif (args.rname or args.rdata):
+        print("Must specify both a name and data!")
+        raise SystemExit(1)
+
+
+def delete(args):
+    zone = Zone.objects.filter(name=args.zone).first()
+
+    if not zone:
+        print("Zone {0:s} not found!".format(args.zone))
+        raise SystemExit(1)
 
     if args.rname:
         zone.delete_record(args.rname)
@@ -56,13 +66,11 @@ def list(args):
 
 
 def show(args):
-    zones = Zone.objects.filter(name=args.zone)
+    zone = Zone.objects.filter(name=args.zone).first()
 
-    if not zones:
+    if not zone:
         print("Zone {0:s} not found!".format(args.zone))
         raise SystemExit(1)
-
-    zone = zones[0]
 
     print("\n".join(record.rr.toZone() for record in zone.records))
 
@@ -102,6 +110,23 @@ def parse_args():
         help="Description"
     )
 
+    # create
+    create_parser = subparsers.add_parser(
+        "create",
+        help="Create a new Zone"
+    )
+    create_parser.set_defaults(func=create)
+
+    create_parser.add_argument(
+        "--ttl", default=None, metavar="TTL", type=int,
+        help="Zone default ttl"
+    )
+
+    create_parser.add_argument(
+        "zone", metavar="ZONE", type=str,
+        help="Name of zone to create"
+    )
+
     # add
     add_parser = subparsers.add_parser(
         "add",
@@ -110,20 +135,25 @@ def parse_args():
     add_parser.set_defaults(func=add)
 
     add_parser.add_argument(
-        "-c", "--class", default="IN", metavar="RCLASS", type=str,
+        "--class", default="IN", metavar="RCLASS", type=str,
         dest="rclass", choices=CLASS.forward.keys(),
         help="Resource class to add"
     )
 
     add_parser.add_argument(
-        "-t", "--type", default="A", metavar="RTYPE", type=str,
+        "--type", default="A", metavar="RTYPE", type=str,
         dest="rtype", choices=QTYPE.forward.keys(),
         help="Resource type to add"
     )
 
     add_parser.add_argument(
+        "--ttl", default=None, metavar="TTL", type=int,
+        help="Resource ttl to add"
+    )
+
+    add_parser.add_argument(
         "zone", metavar="ZONE", type=str,
-        help="Zone to add"
+        help="Zone to add resource to"
     )
 
     add_parser.add_argument(
