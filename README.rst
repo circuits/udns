@@ -55,6 +55,14 @@ Create new Zone::
     
     $ udnsc create abc.com.
 
+Create new Zone from a file::
+    
+    $ udnsc create abc.com. abc.com
+
+or:::
+    
+    $ udnsc create abc.com. - < abc.com
+
 List Zones::
     
     $ udnsc list
@@ -62,6 +70,14 @@ List Zones::
 Show Zone Records::
     
     $ udnsc show abc.com.
+
+Export a Zone:::
+    
+    $ udnsc export abc.com.
+
+.. note:: This exports the Zone to stdout which you can pipe into an output
+          file for storage using your shell.
+          e.g: ``udnsc export abc.com. > abc.com``
 
 Add Zone Records::
     
