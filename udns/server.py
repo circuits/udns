@@ -181,11 +181,12 @@ class Server(Component):
     def ttl(self):
         for k, rrs in self.cache.items():
             for rr in rrs[:]:
-                rr.ttl -= 1
-                if rr.ttl <= 0:
+                if rr.ttl == 0:
                     rrs.remove(rr)
                     if not rrs:
                         del self.cache[k]
+                else:
+                    rr.ttl -= 1
 
     def request(self, peer, request):
         qname = request.q.qname
