@@ -8,12 +8,12 @@
 udns
 ====
 
-udns is an authoritative, caching dns server for development and small
-deployments writtein in `Python`_ using the `circuits`_ Application Framework
+udns is an authoritative, caching DNS server for development and small
+deployments written in `Python`_ using the `circuits`_ Application Framework
 and the `dnslib`_ DNS library. udns can be run standalone, via `Docker`_
 or using the `fig`_ tool. udns is designed to be small, lightweight, fast
-and flexible. udns fully supports forwarding, caching as well as honouring
-ttls.
+and flexible. udns fully supports forwarding, caching as well as honoring
+TTL(s).
 
 
 Installation and Usage
@@ -38,7 +38,7 @@ Using `Docker`_::
     
     $ docker run -d -p 53:53/udp prologic/udns
 
-From PyPi (*ccoming soon*)::
+From PyPi (*coming soon*)::
     
     $ pip install udns
     $ udnsd  # Server
@@ -48,7 +48,7 @@ From PyPi (*ccoming soon*)::
 Managing Zones and Records
 --------------------------
 
-udns is a full authoritative, caching dns server and ships with a client to
+udns is a full authoritative, caching DNS server and ships with a client to
 help manage zones and records. Here are some quick examples:
 
 Create new Zone::
