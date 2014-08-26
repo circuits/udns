@@ -231,9 +231,7 @@ class Server(Component):
 
         reply = request.reply()
 
-        for rr in response.rr:
-            rr.rname = qname
-            reply.add_answer(rr)
+        reply.add_answer(*response.rr)
 
         self.cache[key] = reply.rr
 

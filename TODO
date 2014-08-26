@@ -4,7 +4,6 @@ ToDo List
 Manually maintained ToDo List.
 
 
-- Add support for CNAME lookups.
 - Read system ``/etc/hosts`` if it exists and use to pre-populate zones.
 - Add import/export commands to/from Zone file format using
   ``.toZone()`` and ``.fromZone()`` of dnslib.
