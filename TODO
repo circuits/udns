@@ -8,3 +8,4 @@ Manually maintained ToDo List.
 - Read system ``/etc/hosts`` if it exists and use to pre-populate zones.
 - Add import/export commands to/from Zone file format using
   ``.toZone()`` and ``.fromZone()`` of dnslib.
+- Make the use of Redis optional? (requires an api)
