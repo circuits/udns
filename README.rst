@@ -43,3 +43,37 @@ From PyPi (*ccoming soon*)::
     $ pip install udns
     $ udnsd  # Server
     $ udnsc  # Client
+
+
+Managing Zones and Records
+--------------------------
+
+udns is a full authoritative, caching dns server and ships with a client to
+help manage zones and records. Here are some quick examples:
+
+Create new Zone::
+    
+    $ udnsc create abc.com.
+
+List Zones::
+    
+    $ udnsc list
+
+Show Zone Records::
+    
+    $ udnsc show abc.com.
+
+Add Zone Records::
+    
+    $ udnsc add abc.com. www 127.0.0.1
+
+Delete a Zone Record::
+    
+    $ udnsc delete abc.com. www
+
+Delete a Zone::
+    
+    $ udnsc delete abc.com.
+
+.. note:: You __must__ specify zones as fully qualified domain names with a
+          trailing period. e.g: ``abc.com.``
