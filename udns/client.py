@@ -29,6 +29,9 @@ def create(args):
     zone = Zone(name=args.zone, ttl=args.ttl)
     zone.save()
 
+    if args.file is not None:
+        zone.load(args.file)
+
 
 def add(args):
     zone = Zone.objects.filter(name=args.zone).first()
@@ -73,6 +76,16 @@ def show(args):
         raise SystemExit(1)
 
     print("\n".join(record.rr.toZone() for record in zone.records))
+
+
+def export(args):
+    zone = Zone.objects.filter(name=args.zone).first()
+
+    if not zone:
+        print("Zone {0:s} not found!".format(args.zone))
+        raise SystemExit(1)
+
+    print(zone.export())
 
 
 def setup_database(args):
@@ -123,8 +136,13 @@ def parse_args():
     )
 
     create_parser.add_argument(
-        "zone", metavar="ZONE", type=str,
+        "zone", nargs="?", default=None, metavar="ZONE", type=str,
         help="Name of zone to create"
+    )
+
+    create_parser.add_argument(
+        "file", metavar="FILE", type=str,
+        help="Zone file to import or - for stdin"
     )
 
     # add
@@ -200,6 +218,18 @@ def parse_args():
     show_parser.add_argument(
         "zone", metavar="ZONE", type=str,
         help="Zone to display"
+    )
+
+    # export
+    export_parser = subparsers.add_parser(
+        "export",
+        help="Export a Zone"
+    )
+    export_parser.set_defaults(func=export)
+
+    export_parser.add_argument(
+        "zone", metavar="ZONE", type=str,
+        help="Zone to export"
     )
 
     return parser.parse_args()

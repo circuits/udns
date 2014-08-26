@@ -50,6 +50,15 @@ class Zone(Model):
             record.delete()
         super(Zone, self).delete()
 
+    def _add_record(self, rname, rdata, rclass=CLASS.IN, rtype=QTYPE.A, ttl=0):
+        record = Record(
+            rname=rname, rdata=rdata,
+            rclass=rclass, rtype=rtype, ttl=ttl
+        )
+        record.save()
+        self.records.append(record)
+        self.save()
+
     def add_record(self, rname, rdata, **options):
         rclass = options.get("rclass", CLASS.IN)
         rtype = options.get("rtype", QTYPE.A)
@@ -59,13 +68,7 @@ class Zone(Model):
         rtype = rtype if rtype is not None else QTYPE.A
         ttl = ttl if ttl is not None else self.ttl
 
-        record = Record(
-            rname="{0:s}.{1:s}".format(rname, self.name), rdata=rdata,
-            ttl=ttl, rtype=rtype, rclass=rclass
-        )
-        record.save()
-        self.records.append(record)
-        self.save()
+        self._add_record(rname, rdata, rclass=rclass, rtype=rtype, ttl=ttl)
 
     def delete_record(self, rname):
         fullname = "{0:s}.{1:s}".format(rname, self.name)
@@ -83,6 +86,38 @@ class Zone(Model):
 
         del self.records[i]
         self.save()
+
+    def load(self, filename):
+        fd = sys.stdin if filename == "-" else open(filename, "r")
+        for rr in RR.fromZone(fd.read()):
+            rname = str(rr.rname)
+            rdata = str(rr.rdata)
+            rclass = rr.rclass
+            rtype = rr.rtype
+            ttl = rr.ttl
+
+            self._add_record(rname, rdata, rclass=rclass, rtype=rtype, ttl=ttl)
+
+    def export(self):
+        out = [
+            "$TTL {0:d}".format(self.ttl),
+            "$ORIGIN {0:s}".format(self.name.rstrip(".")),
+            "",
+        ]
+
+        for record in self.records:
+            rr = record.rr
+            rname = rr.rname.stripSuffix(self.name).label[0]
+            out.append(
+                "{0:23s} {1:7d} {2:7s} {3:7s} {4:s}".format(
+                    rname, rr.ttl,
+                    CLASS.get(rr.rclass),
+                    QTYPE.get(rr.rtype),
+                    rr.rdata.toZone()
+                )
+            )
+
+        return "\n".join(out)
 
     class Meta:
         indicies = ("id", "name",)
