@@ -243,10 +243,16 @@ class Server(Component):
         del self.requests[id]
 
 
-def waitfor(address, port, timeout=10):
+def waitfor(host, port, timeout=10):
     sock = socket(AF_INET, SOCK_STREAM)
-    while not sock.connect_ex((address, port)) == 0 and timeout:
+
+    while not sock.connect_ex((host, port)) == 0 and timeout:
+        timeout -= 1
         sleep(1)
+
+    if timeout <= 0:
+        print("Timed out waiting for {0:s}:{1:d}".format(host, port))
+        raise SystemExit(1)
 
 
 def setup_database(args, logger):
