@@ -1,6 +1,8 @@
 redis:
     image: redis
     name: redis
+    ports:
+        - "6379:6379"
 
 udns:
     build: .
