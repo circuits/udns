@@ -4,4 +4,5 @@ log
 dist
 build
 *.pyc
+zones
 *.egg-info
