@@ -10,7 +10,7 @@ from time import sleep
 from os import environ
 from logging import getLogger
 from socket import AF_INET, SOCK_STREAM, socket
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 
 
 from cachetools import LRUCache
@@ -23,6 +23,7 @@ from redisco import connection_setup, get_client
 from redisco.models import Attribute, IntegerField, ListField
 
 
+from circuits.app import Daemon
 from circuits.net.events import write
 from circuits.net.sockets import UDPServer
 from circuits import Component, Debugger, Event, Timer
@@ -167,6 +168,9 @@ class Server(Component):
         self.peers = {}
         self.requests = {}
         self.cache = LRUCache(maxsize=100)
+
+        if args.daemon:
+            Daemon(args.pidfile).register(self)
 
         if args.debug:
             Debugger(events=args.verbose, logger=logger).register(self)
@@ -316,13 +320,11 @@ def setup_database(args, logger):
 
 
 def setup_logging(args):
-    logstream = sys.stderr if args.logfile is None else open(args.logfile, "a")
-
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 
         level=logging.DEBUG if args.debug else logging.INFO,
-        stream=logstream,
+        stream=args.logfile
     )
 
     return getLogger(__name__)
@@ -343,21 +345,15 @@ def parse_args():
     )
 
     add(
-        "--daemon", action="store_true", default=False,
-        dest="daemon",
-        help="run as a background process"
-    )
-
-    add(
         "--verbose", action="store_true", default=False,
         dest="verbose",
         help="enable verbose logging"
     )
 
     add(
-        "--logfile", action="store", default=None,
-        dest="logfile", metavar="FILE", type=str,
-        help="store logging information to FILE"
+        "--logfile", action="store", default="/dev/stdout",
+        dest="logfile", metavar="FILE", type=FileType("w"),
+        help="write logs to FILE"
     )
 
     add(
@@ -385,6 +381,12 @@ def parse_args():
         action="store", type=str,
         default="0.0.0.0:53", dest="bind",
         help="Bind to address:[port]"
+    )
+
+    add(
+        "-d", "--daemon", action="store_true", default=False,
+        dest="daemon",
+        help="run as a background process"
     )
 
     add(

@@ -31,6 +31,10 @@ From PyPi (*coming soon*):
     $ udnsd  # Server
     $ udnsc  # Client
 
+Running as a Daemon:
+
+    $ sudo udnsd -d --logfile=$(pwd)/udnsd.log --pidfile=$(pwd)/udnsd.pid
+
 Managing Zones and Records
 --------------------------
 
