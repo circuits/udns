@@ -4,7 +4,6 @@
 from __future__ import print_function
 
 
-import sys
 import logging
 from time import sleep
 from os import environ, path
@@ -15,8 +14,8 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 
 from cachetools import LRUCache
 
-from dnslib import DNSQuestion, DNSRecord
 from dnslib import A, CLASS, QR, QTYPE, RDMAP, RR
+from dnslib import DNSQuestion, DNSRecord, ZoneParser
 
 from redisco.models import Model
 from redisco import connection_setup, get_client
@@ -91,9 +90,10 @@ class Zone(Model):
         del self.records[i]
         self.save()
 
-    def load(self, filename):
-        fd = sys.stdin if filename == "-" else open(filename, "r")
-        for rr in RR.fromZone(fd.read()):
+    def load(self, f):
+        parser = ZoneParser(f.read())
+
+        for rr in list(parser):
             rname = str(rr.rname)
             rdata = str(rr.rdata)
             rclass = rr.rclass
@@ -101,6 +101,9 @@ class Zone(Model):
             ttl = rr.ttl
 
             self._add_record(rname, rdata, rclass=rclass, rtype=rtype, ttl=ttl)
+
+        self.ttl = parser.ttl
+        self.save()
 
     def export(self):
         out = [

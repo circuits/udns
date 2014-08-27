@@ -5,7 +5,7 @@ from __future__ import print_function
 
 
 from os import environ
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 
 
 from dnslib import CLASS, QTYPE
@@ -141,8 +141,8 @@ def parse_args():
     )
 
     create_parser.add_argument(
-        "file", nargs="?", metavar="FILE", type=str,
-        help="Zone file to import or - for stdin"
+        "file", metavar="FILE", default="-", type=FileType("r"),
+        help="Zone file to import"
     )
 
     # add
