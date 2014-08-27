@@ -1,7 +1,7 @@
 udns
 ====
 
-udns is an authoritative, caching DNS server for development and small deployments written in [Python][] using the [circuits][] Application Framework and the [dnslib][] DNS library. udns can be run standalone, via [Docker][] or using the [fig][] tool. udns is designed to be small, lightweight, fast and flexible. udns fully supports forwarding, caching as well as honoring TTL(s).
+udns is an authoritative, caching DNS server for development and small deployments written in [Python][] using the [circuits][] Application Framework and the [dnslib][] DNS library. udns can be run standalone, via [Docker][] or using the [fig][] tool. udns is designed to be small, lightweight, fast and flexible. udns fully supports forwarding, caching as well as honoring TTL(s). udns will also read your `/etc/hosts` file at startup and use this to populate an internal hosts cache so that entries in your local `/etc/hosts` file are fully resolvable with tools such as `host`, `dig` and resolver client libraries.
 
 Installation and Usage
 ----------------------

@@ -7,7 +7,7 @@ from __future__ import print_function
 import sys
 import logging
 from time import sleep
-from os import environ
+from os import environ, path
 from logging import getLogger
 from socket import AF_INET, SOCK_STREAM, socket
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
@@ -16,7 +16,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 from cachetools import LRUCache
 
 from dnslib import DNSQuestion, DNSRecord
-from dnslib import CLASS, QR, QTYPE, RDMAP, RR
+from dnslib import A, CLASS, QR, QTYPE, RDMAP, RR
 
 from redisco.models import Model
 from redisco import connection_setup, get_client
@@ -156,10 +156,11 @@ class DNS(Component):
 
 class Server(Component):
 
-    def init(self, args, db, logger):
+    def init(self, args, db, hosts, logger):
         self.args = args
         self.db = db
 
+        self.hosts = hosts
         self.logger = logger
 
         self.bind = args.bind
@@ -196,11 +197,12 @@ class Server(Component):
                     rr.ttl -= 1
 
     def request(self, peer, request):
-        qname = request.q.qname
+        qname = str(request.q.qname)
         qtype = request.q.qtype
         qclass = request.q.qclass
 
         key = (qname, qtype, qclass)
+
         if key in self.cache:
             self.logger.info(
                 "Cached Request ({0:s}): {1:s} {2:s} {3:s}".format(
@@ -213,6 +215,24 @@ class Server(Component):
             for rr in self.cache[key]:
                 reply.add_answer(rr)
             self.fire(write(peer, reply.pack()))
+            return
+
+        if key in self.hosts:
+            self.logger.info(
+                "Local Hosts Request ({0:s}): {1:s} {2:s} {3:s}".format(
+                    "{0:s}:{1:d}".format(*peer),
+                    CLASS.get(qclass), QTYPE.get(qtype), qname
+                )
+            )
+
+            rr = [RR(qname, rdata=A(self.hosts[key]))]
+            reply = request.reply()
+            reply.add_answer(*rr)
+
+            self.cache[key] = rr
+
+            self.fire(write(peer, reply.pack()))
+
             return
 
         records = Record.objects.filter(
@@ -253,7 +273,8 @@ class Server(Component):
 
     def response(self, peer, response):
         id = response.header.id
-        qname = response.q.qname
+
+        qname = str(response.q.qname)
         qtype = response.q.qtype
         qclass = response.q.qclass
 
@@ -270,7 +291,7 @@ class Server(Component):
         peer = self.peers[id]
         request = self.requests[id]
 
-        key = (request.q.qname, request.q.qtype, request.q.qclass)
+        key = (str(request.q.qname), request.q.qtype, request.q.qclass)
 
         reply = request.reply()
 
@@ -399,6 +420,26 @@ def parse_args():
     return parser.parse_args()
 
 
+def parse_hosts(filename):
+    hosts = {}
+
+    if path.exists(filename):
+        with open(filename, "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                tokens = line.split()
+                rdata, labels = tokens[0], tokens[1:]
+                for label in labels:
+                    if not label.endswith("."):
+                        label = "{0:s}.".format(label)
+                    key = (label, QTYPE.A, CLASS.IN)
+                    hosts[key] = rdata
+
+    return hosts
+
+
 def main():
     args = parse_args()
 
@@ -406,7 +447,12 @@ def main():
 
     db = setup_database(args, logger)
 
-    Server(args, db, logger).run()
+    hosts = parse_hosts("/etc/hosts")
+
+    from pprint import pprint
+    pprint(hosts)
+
+    Server(args, db, hosts, logger).run()
 
 
 if __name__ == "__main__":

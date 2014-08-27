@@ -13,7 +13,10 @@ deployments written in `Python`_ using the `circuits`_ Application Framework
 and the `dnslib`_ DNS library. udns can be run standalone, via `Docker`_
 or using the `fig`_ tool. udns is designed to be small, lightweight, fast
 and flexible. udns fully supports forwarding, caching as well as honoring
-TTL(s).
+TTL(s). udns will also read your ``/etc/hosts`` file at startup and use
+this to populate an internal hosts cache so that entries in your local
+``/etc/hosts`` file are fully resolvable with tools such as ``host``,
+``dig`` and resolver client libraries.
 
 
 Installation and Usage

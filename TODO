@@ -4,5 +4,4 @@ ToDo List
 Manually maintained ToDo List.
 
 
-- Read system ``/etc/hosts`` if it exists and use to pre-populate zones.
 - Make the use of Redis optional? (requires an api)
