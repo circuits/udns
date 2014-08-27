@@ -244,7 +244,7 @@ class Server(Component):
             )
         )
 
-        lookup = DNSRecord(q=DNSQuestion(qname, qclass, qtype))
+        lookup = DNSRecord(q=DNSQuestion(qname, qtype, qclass))
         id = lookup.header.id
         self.peers[id] = peer
         self.requests[id] = request
