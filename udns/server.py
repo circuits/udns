@@ -68,7 +68,10 @@ class Zone(Model):
         rtype = rtype if rtype is not None else QTYPE.A
         ttl = ttl if ttl is not None else self.ttl
 
-        self._add_record(rname, rdata, rclass=rclass, rtype=rtype, ttl=ttl)
+        self._add_record(
+            "{0:s}.{1:s}".format(rname, self.name), rdata,
+            rclass=rclass, rtype=rtype, ttl=ttl
+        )
 
     def delete_record(self, rname):
         fullname = "{0:s}.{1:s}".format(rname, self.name)
