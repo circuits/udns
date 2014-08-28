@@ -8,7 +8,7 @@ from dnslib import CLASS, QTYPE  # noqa
 from redisco import connection_setup, get_client
 
 
-from server import Zone, Record  # noqa
+from udns.server import Zone, Record  # noqa
 
 
 connection_setup()
