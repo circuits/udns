@@ -25,7 +25,7 @@ from redisco.models import Attribute, IntegerField, ListField
 from circuits.app import Daemon
 from circuits.net.events import write
 from circuits.net.sockets import UDPServer
-from circuits import Component, Debugger, Event, Timer
+from circuits import Component, Debugger, Event
 
 
 __version__ = "0.0.1"
@@ -188,7 +188,7 @@ class Server(Component):
         )
 
         # FIXME: This causes a problem with cached lookups such as:
-        #        
+        #
         # bash-4.2# host mail.google.com
         # mail.google.com is an alias for googlemail.l.google.com.
         # googlemail.l.google.com has address 74.125.237.182
