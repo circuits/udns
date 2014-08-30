@@ -187,7 +187,21 @@ class Server(Component):
             "DNS Server Ready! Listening on {0:s}:{1:d}".format(*bind)
         )
 
-        Timer(1, Event.create("ttl"), persist=True).register(self)
+        # FIXME: This causes a problem with cached lookups such as:
+        #        
+        # bash-4.2# host mail.google.com
+        # mail.google.com is an alias for googlemail.l.google.com.
+        # googlemail.l.google.com has address 74.125.237.182
+        # googlemail.l.google.com has address 74.125.237.181
+        # googlemail.l.google.com has IPv6 address 2404:6800:4006:804::1015
+        #
+        # After some elapsed time ...
+        #
+        # bash-4.2# host mail.google.com
+        # mail.google.com is an alias for googlemail.l.google.com.
+        # googlemail.l.google.com has IPv6 address 2404:6800:4006:806::1016
+
+        # Timer(1, Event.create("ttl"), persist=True).register(self)
 
     def ttl(self):
         for k, rrs in self.cache.items():
