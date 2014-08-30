@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+# Module:   client
+# Date:     30th August 2014
+# Author:   James Mills, prologic at shortcircuit dot net dot au
+
+
+"""Client"""
 
 
 from __future__ import print_function
@@ -13,10 +18,8 @@ from dnslib import CLASS, QTYPE
 from redisco import connection_setup
 
 
-from server import Zone
-
-
-__version__ = "0.0.1"
+from .models import Zone
+from . import __version__
 
 
 def create(args):
