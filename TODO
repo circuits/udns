@@ -4,7 +4,6 @@ ToDo List
 Manually maintained ToDo List.
 
 
-- Fix a bug with cached lookups and ttl(s). (See: FIXME in udns/server.py)
 - Add internal support for CNAME records
 - Add internal support for @ IN A records (wildcards)
 - Make the use of Redis optional? (requires an api)

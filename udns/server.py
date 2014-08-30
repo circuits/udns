@@ -25,7 +25,7 @@ from dnslib import DNSQuestion, DNSRecord
 from circuits.app import Daemon
 from circuits.net.events import write
 from circuits.net.sockets import UDPServer
-from circuits import Component, Debugger, Event
+from circuits import Component, Debugger, Event, Timer
 
 from redisco import connection_setup, get_client
 
@@ -80,30 +80,20 @@ class Server(Component):
             "DNS Server Ready! Listening on {0:s}:{1:d}".format(*bind)
         )
 
-        # FIXME: This causes a problem with cached lookups such as:
-        #
-        # bash-4.2# host mail.google.com
-        # mail.google.com is an alias for googlemail.l.google.com.
-        # googlemail.l.google.com has address 74.125.237.182
-        # googlemail.l.google.com has address 74.125.237.181
-        # googlemail.l.google.com has IPv6 address 2404:6800:4006:804::1015
-        #
-        # After some elapsed time ...
-        #
-        # bash-4.2# host mail.google.com
-        # mail.google.com is an alias for googlemail.l.google.com.
-        # googlemail.l.google.com has IPv6 address 2404:6800:4006:806::1016
-
-        # Timer(1, Event.create("ttl"), persist=True).register(self)
+        Timer(1, Event.create("ttl"), persist=True).register(self)
 
     def ttl(self):
-        for k, rrs in self.cache.items():
-            for rr in rrs[:]:
-                if rr.ttl == 0:
-                    rrs.remove(rr)
-                    if not rrs:
-                        del self.cache[k]
-                else:
+        for k, rrs in self.cache.items()[:]:
+            if any(rr.ttl == 0 for rr in rrs):
+                qname, qtype, qclass = k
+                self.logger.info(
+                    "Expired Entry: {0:s} {1:s} {2:s}".format(
+                        CLASS.get(qclass), QTYPE.get(qtype), qname
+                    )
+                )
+                del self.cache[k]
+            else:
+                for rr in rrs:
                     rr.ttl -= 1
 
     def request(self, peer, request):
