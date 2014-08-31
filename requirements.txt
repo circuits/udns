@@ -1,10 +1,8 @@
-cachetools
+circuits==3.0
+cachetools==0.4.0
 
 # Development version of dnslib
 -e hg+https://bitbucket.org/prologic/dnslib#egg=dnslib-0.9.1
 
 # Development version of redisco
 -e git+https://github.com/kiddouk/redisco.git#egg=redisco-0.2.4
-
-# Development version of circuits
--e hg+https://bitbucket.org/circuits/circuits#egg=circuits-3.0.0.dev

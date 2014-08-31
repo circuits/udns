@@ -36,15 +36,13 @@ setup(
     include_package_data=True,
     scripts=glob("bin/*"),
     dependency_links=[
-        "https://bitbucket.org/circuits/circuits/get/tip.zip#egg=circuits-3.0.0.dev",  # noqa
-        "https://bitbucket.org/prologic/dnslib/get/tip.zip#egg=dnslib-0.9.1",
         "https://github.com/kiddouk/redisco/archive/master.zip#egg=redisco-0.2.4"  # noqa
     ],
     install_requires=(
-        "cachetools",
-        "dnslib==0.9.1",
+        "circuits==3.0",
+        "dnslib==0.9.3",
         "redisco==0.2.4",
-        "circuits==3.0.0.dev",
+        "cachetools==0.4.0",
     ),
     entry_points={
         "console_scripts": [
