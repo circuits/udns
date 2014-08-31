@@ -64,7 +64,7 @@ class Server(Component):
 
         self.peers = {}
         self.requests = {}
-        self.cache = LRUCache(maxsize=100)
+        self.cache = LRUCache(maxsize=args.cachesize)
 
         if args.daemon:
             Daemon(args.pidfile).register(self)
@@ -295,6 +295,13 @@ def parse_args():
         default=int(environ.get("REDIS_PORT_6379_TCP_PORT", "6379")),
         dest="dbport", metavar="PORT", type=int,
         help="set database port to PORT (Redis)"
+    )
+
+    add(
+        "--cachesize", action="store",
+        default=int(environ.get("CACHESIZEE", "1024")),
+        dest="cachesize", metavar="SIZEe", type=int,
+        help="set cache size to SIZE"
     )
 
     add(
