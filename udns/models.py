@@ -88,7 +88,7 @@ class Zone(Model):
 
         for record in self.records:
             rr = record.rr
-            rname = rr.rname.stripSuffix(self.name).label[0]
+            rname = str(rr.rname.stripSuffix(self.name))
             out.append(
                 "{0:23s} {1:7d} {2:7s} {3:7s} {4:s}".format(
                     rname, rr.ttl,
