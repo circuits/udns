@@ -19,7 +19,7 @@ setup(
     url="http://bitbucket.org/prologic/udns/",
     download_url="http://bitbucket.org/prologic/udns/downloads/",
     classifiers=[
-        "Development Status :: 1 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: No Input/Output (Daemon)",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
