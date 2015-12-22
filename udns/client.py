@@ -144,7 +144,7 @@ def parse_args():
     )
 
     create_parser.add_argument(
-        "file", metavar="FILE", default="-", type=FileType("r"),
+        "file", metavar="FILE", default=None, type=FileType("r"),
         help="Zone file to import"
     )
 
