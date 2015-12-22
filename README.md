@@ -1,35 +1,35 @@
 udns
 ====
 
-udns is an authoritative, caching DNS server for development and small deployments written in [Python][] using the [circuits][] Application Framework and the [dnslib][] DNS library. udns can be run standalone, via [Docker][] or using the [fig][] tool. udns is designed to be small, lightweight, fast and flexible. udns fully supports forwarding, caching as well as honoring TTL(s). udns will also read your `/etc/hosts` file at startup and use this to populate an internal hosts cache so that entries in your local `/etc/hosts` file are fully resolvable with tools such as `host`, `dig` and resolver client libraries.
+udns is an authoritative, caching DNS server for development and small deployments written in [Python](http://python.org/) using the [circuits](http://circuitsframework.org/) Application Framework and the [dnslib](https://pypi.python.org/pypi/dnslib) DNS library. udns can be run standalone, via [Docker](http://docker.com/) or using the [Docker Compose](https://docs.docker.com/compose/) tool. udns is designed to be small, lightweight, fast and flexible. udns fully supports forwarding, caching as well as honoring TTL(s). udns will also read your `/etc/hosts` file at startup and use this to populate an internal hosts cache so that entries in your local `/etc/hosts` file are fully resolvable with tools such as `host`, `dig` and resolver client libraries.
 
 Installation and Usage
 ----------------------
 
 From Source:
 
-    $ hg clone https://bitbucket.org/circuits/udns
+    $ git clone https://github.com/prologic/udns
     $ cd udns
     $ python setup.py develop
     $ sudo udnsd --debug  # Server
     $ udnsc --help        # Client
 
-From Source using [fig][] and [Docker][]:
+From Source using [Docker](http://docker.com/) and [Docker Compose](https://docs.docker.com/compose/):
 
-    $ hg clone https://bitbucket.org/circuits/udns
+    $ git clone https://github.com/prologic/udns
     $ cd udns
-    $ fig up                   # Server
-    $ fig run --rm udns udnsc  # Client
+    $ docker-compose up -d                  # Server
+    $ docker-compose run --rm udns udnsc    # Client
 
-Using [Docker][]:
+Using [Docker](http://docker.com/):
 
     $ docker run -d -p 53:53/udp prologic/udns
 
 From PyPi (*coming soon*):
 
     $ pip install udns
-    $ udnsd  # Server
-    $ udnsc  # Client
+    $ udnsd     # Server
+    $ udnsc     # Client
 
 Running as a Daemon:
 
@@ -86,8 +86,4 @@ Delete a Zone:
 > You \_\_must\_\_ specify zones as fully qualified domain names with a  
 > trailing period. e.g: `abc.com.`
 >
-  [Python]: http://python.org/
-  [circuits]: http://circuitsframework.org/
-  [dnslib]: https://pypi.python.org/pypi/dnslib
-  [Docker]: http://docker.com/
-  [fig]: http://fig.sh/
+

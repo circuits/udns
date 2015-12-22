@@ -16,8 +16,8 @@ setup(
     ),
     author="James Mills",
     author_email="James Mills, prologic at shortcircuit dot net dot au",
-    url="http://bitbucket.org/prologic/udns/",
-    download_url="http://bitbucket.org/prologic/udns/downloads/",
+    url="https://github.com/prologic/udns/",
+    download_url="https://github.org/com/udns/releases/",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: No Input/Output (Daemon)",

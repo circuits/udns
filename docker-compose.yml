@@ -1,0 +1,9 @@
+udnsd:
+  build: .
+  links:
+    - "udnsdb:redis"
+  ports:
+    - "53:53/udp"
+
+udnsdb:
+  image: redis

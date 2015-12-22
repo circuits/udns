@@ -2,7 +2,7 @@
 .. _circuits: http://circuitsframework.org/
 .. _Docker: http://docker.com/
 .. _Python: http://python.org/
-.. _fig: http://fig.sh/
+.. _Docker Compose: https://docs.docker.com/compose/
 
 
 udns
@@ -11,12 +11,12 @@ udns
 udns is an authoritative, caching DNS server for development and small
 deployments written in `Python`_ using the `circuits`_ Application Framework
 and the `dnslib`_ DNS library. udns can be run standalone, via `Docker`_
-or using the `fig`_ tool. udns is designed to be small, lightweight, fast
-and flexible. udns fully supports forwarding, caching as well as honoring
-TTL(s). udns will also read your ``/etc/hosts`` file at startup and use
-this to populate an internal hosts cache so that entries in your local
-``/etc/hosts`` file are fully resolvable with tools such as ``host``,
-``dig`` and resolver client libraries.
+or using the `Docker Compose`_ tool. udns is designed to be small,
+lightweight, fast and flexible. udns fully supports forwarding, caching
+as well as honoring TTL(s). udns will also read your ``/etc/hosts`` file
+at startup and use this to populate an internal hosts cache so that entries
+in your local ``/etc/hosts`` file are fully resolvable with tools such as
+``host``, ``dig`` and resolver client libraries.
 
 
 Installation and Usage
@@ -24,18 +24,18 @@ Installation and Usage
 
 From Source::
     
-    $ hg clone https://bitbucket.org/circuits/udns
+    $ git clone https://github.com/prologic/udns
     $ cd udns
     $ python setup.py develop
     $ sudo udnsd --debug  # Server
     $ udnsc --help        # Client
 
-From Source using `fig`_ and `Docker`_::
+From Source using `Docker`_ and `Docker Compose`_::
     
-    $ hg clone https://bitbucket.org/circuits/udns
+    $ git clone https://github.com/prologic/udns
     $ cd udns
-    $ fig up                   # Server
-    $ fig run --rm udns udnsc  # Client
+    $ docker-compose up -d                  # Server
+    $ docker-compose run --rm udns udnsc    # Client
 
 Using `Docker`_::
     
@@ -44,8 +44,8 @@ Using `Docker`_::
 From PyPi (*coming soon*)::
     
     $ pip install udns
-    $ udnsd  # Server
-    $ udnsc  # Client
+    $ udnsd     # Server
+    $ udnsc     # Client
 
 
 Running as a Daemon::
