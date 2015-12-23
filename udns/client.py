@@ -139,12 +139,12 @@ def parse_args():
     )
 
     create_parser.add_argument(
-        "zone", default=None, metavar="ZONE", type=str,
+        "zone", metavar="ZONE", type=str,
         help="Name of zone to create"
     )
 
     create_parser.add_argument(
-        "file", metavar="FILE", default=None, type=FileType("r"),
+        "file", metavar="FILE", default=None, nargs="?", type=FileType("r"),
         help="Zone file to import"
     )
 
