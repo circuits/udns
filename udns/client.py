@@ -49,7 +49,7 @@ def add(args):
             rclass=getattr(CLASS, args.rclass),
             rtype=getattr(QTYPE, args.rtype)
         )
-    elif (args.rname or args.rdata):
+    else:
         print("Must specify both a name and data!")
         raise SystemExit(1)
 
@@ -157,13 +157,13 @@ def parse_args():
 
     add_parser.add_argument(
         "--class", default="IN", metavar="RCLASS", type=str,
-        dest="rclass", choices=CLASS.forward.keys(),
+        dest="rclass", choices=CLASS.reverse.keys(),
         help="Resource class to add"
     )
 
     add_parser.add_argument(
         "--type", default="A", metavar="RTYPE", type=str,
-        dest="rtype", choices=QTYPE.forward.keys(),
+        dest="rtype", choices=QTYPE.reverse.keys(),
         help="Resource type to add"
     )
 
