@@ -8,6 +8,10 @@
 udns
 ====
 
+.. image:: https://badge.waffle.io/prologic/udns.png?label=ready&title=Ready 
+   :target: https://waffle.io/prologic/udns
+   :alt: 'Stories in Ready'
+
 udns is an authoritative, caching DNS server for development and small
 deployments written in `Python`_ using the `circuits`_ Application Framework
 and the `dnslib`_ DNS library. udns can be run standalone, via `Docker`_

@@ -1,6 +1,7 @@
-[![Stories in Ready](https://badge.waffle.io/prologic/udns.png?label=ready&title=Ready)](https://waffle.io/prologic/udns)
 udns
 ====
+
+[!['Stories in Ready'](https://badge.waffle.io/prologic/udns.png?label=ready&title=Ready)](https://waffle.io/prologic/udns)
 
 udns is an authoritative, caching DNS server for development and small deployments written in [Python](http://python.org/) using the [circuits](http://circuitsframework.org/) Application Framework and the [dnslib](https://pypi.python.org/pypi/dnslib) DNS library. udns can be run standalone, via [Docker](http://docker.com/) or using the [Docker Compose](https://docs.docker.com/compose/) tool. udns is designed to be small, lightweight, fast and flexible. udns fully supports forwarding, caching as well as honoring TTL(s). udns will also read your `/etc/hosts` file at startup and use this to populate an internal hosts cache so that entries in your local `/etc/hosts` file are fully resolvable with tools such as `host`, `dig` and resolver client libraries.
 
