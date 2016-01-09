@@ -43,12 +43,21 @@ class Zone(Model):
         ttl = ttl if ttl is not None else self.ttl
 
         self._add_record(
-            "{0:s}.{1:s}".format(rname, self.name), rdata,
+            self.name
+            if rname == "@"
+            else "{0:s}.{1:s}".format(rname, self.name),
+            rdata,
             rclass=rclass, rtype=rtype, ttl=ttl
         )
 
     def delete_record(self, rname):
-        fullname = "{0:s}.{1:s}".format(rname, self.name)
+        fullname = (
+            self.name
+            if rname == "@"
+            else
+            "{0:s}.{1:s}".format(rname, self.name)
+        )
+
         records = [
             (i, record)
             for i, record in enumerate(self.records)

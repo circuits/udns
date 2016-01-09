@@ -6,5 +6,4 @@ Manually maintained ToDo List.
 
 - Merge show/export commands.
 - Add internal support for CNAME records
-- Add internal support for @ IN A records (wildcards)
 - Make the use of Redis optional? (requires an api)
