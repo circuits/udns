@@ -11,6 +11,7 @@ from __future__ import print_function
 
 from os import environ
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
+from code import InteractiveConsole
 
 
 from dnslib import CLASS, QTYPE
@@ -89,6 +90,14 @@ def export(args):
         raise SystemExit(1)
 
     print(zone.export())
+
+
+def dbshell(args):
+    vars = {}
+    vars.update(globals())
+    vars.update(locals())
+    console = InteractiveConsole(vars)
+    console.interact()
 
 
 def setup_database(args):
@@ -234,6 +243,13 @@ def parse_args():
         "zone", metavar="ZONE", type=str,
         help="Zone to export"
     )
+
+    # dbshell
+    dbshell_parser = subparsers.add_parser(
+        "dbshell",
+        help="Interactive DB Shell"
+    )
+    dbshell_parser.set_defaults(func=dbshell)
 
     return parser.parse_args()
 
