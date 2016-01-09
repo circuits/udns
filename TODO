@@ -5,5 +5,4 @@ Manually maintained ToDo List.
 
 
 - Merge show/export commands.
-- Add internal support for CNAME records
 - Make the use of Redis optional? (requires an api)

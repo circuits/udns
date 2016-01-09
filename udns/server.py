@@ -34,6 +34,9 @@ from . import __version__
 from .models import Record
 
 
+CNAME = QTYPE.reverse["CNAME"]
+
+
 class request(Event):
     """request Event"""
 
@@ -135,41 +138,48 @@ class Server(Component):
 
             return
 
-        records = Record.objects.filter(
-            rname=qname, rclass=qclass, rtype=qtype
-        )
+        records = Record.objects.filter(rname=qname)
 
-        if records:
+        if not records:
             self.logger.info(
-                "Authoritative Request ({0:s}): {1:s} {2:s} {3:s}".format(
+                "Request ({0:s}): {1:s} {2:s} {3:s}:{4:s} -> {4:d}".format(
                     "{0:s}:{1:d}".format(*peer),
-                    CLASS.get(qclass), QTYPE.get(qtype), qname
+                    CLASS.get(qclass), QTYPE.get(qtype), qname,
+                    self.forward, 53
                 )
             )
 
-            rr = [record.rr for record in records]
-            reply = request.reply()
-            reply.add_answer(*rr)
+            lookup = DNSRecord(q=DNSQuestion(qname, qtype, qclass))
+            id = lookup.header.id
+            self.peers[id] = peer
+            self.requests[id] = request
 
-            self.cache[key] = rr
-
-            self.fire(write(peer, reply.pack()))
+            self.fire(write((self.forward, 53), lookup.pack()))
 
             return
 
         self.logger.info(
-            "Request ({0:s}): {1:s} {2:s} {3:s}".format(
+            "Authoritative Request ({0:s}): {1:s} {2:s} {3:s}".format(
                 "{0:s}:{1:d}".format(*peer),
                 CLASS.get(qclass), QTYPE.get(qtype), qname
             )
         )
 
-        lookup = DNSRecord(q=DNSQuestion(qname, qtype, qclass))
-        id = lookup.header.id
-        self.peers[id] = peer
-        self.requests[id] = request
+        rr = []
+        reply = request.reply()
 
-        self.fire(write((self.forward, 53), lookup.pack()))
+        if len(records) == 1 and records[0].rtype == CNAME:
+            rr.append(records[0].rr)
+            records = Record.objects.filter(rname=records[0].rdata)
+
+        for record in records:
+            rr.append(record.rr)
+
+        reply.add_answer(*rr)
+
+        self.cache[key] = rr
+
+        self.fire(write(peer, reply.pack()))
 
     def response(self, peer, response):
         id = response.header.id
