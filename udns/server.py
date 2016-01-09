@@ -142,7 +142,7 @@ class Server(Component):
 
         if not records:
             self.logger.info(
-                "Request ({0:s}): {1:s} {2:s} {3:s}:{4:s} -> {4:d}".format(
+                "Request ({0:s}): {1:s} {2:s} {3:s} -> {4:s}:{5:d}".format(
                     "{0:s}:{1:d}".format(*peer),
                     CLASS.get(qclass), QTYPE.get(qtype), qname,
                     self.forward, 53
