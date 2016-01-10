@@ -1,0 +1,4 @@
+cram
+pytest
+coveralls
+pytest-cov

@@ -1,6 +1,8 @@
 dnslib
-circuits
 cachetools
+
+# Development version of circuits
+-e git+https://github.com/circuits/circuits.git#egg=circuits
 
 # Development version of redisco
 -e git+https://github.com/kiddouk/redisco.git#egg=redisco-0.2.4

@@ -1,8 +1,3 @@
-# Module:   server
-# Date:     30th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
 """Server"""
 
 
@@ -13,14 +8,15 @@ import logging
 from time import sleep
 from os import environ, path
 from logging import getLogger
+from collections import defaultdict
 from socket import AF_INET, SOCK_STREAM, socket
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 
 
 from cachetools import LRUCache
 
-from dnslib import A, CLASS, QR, QTYPE, RR
 from dnslib import DNSQuestion, DNSRecord
+from dnslib import A, AAAA, CLASS, QR, QTYPE, RR
 
 from circuits.app import Daemon
 from circuits.net.events import write
@@ -55,6 +51,8 @@ class DNS(Component):
 
 class Server(Component):
 
+    channel  = "server"
+
     def init(self, args, db, hosts, logger):
         self.args = args
         self.db = db
@@ -75,15 +73,17 @@ class Server(Component):
         if args.debug:
             Debugger(events=args.verbose, logger=logger).register(self)
 
-        self.transport = UDPServer(self.bind).register(self)
-        self.protocol = DNS().register(self)
+        self.transport = UDPServer(
+            self.bind, channel=self.channel
+        ).register(self)
+        self.protocol = DNS(channel=self.channel).register(self)
 
     def ready(self, server, bind):
         self.logger.info(
             "DNS Server Ready! Listening on {0:s}:{1:d}".format(*bind)
         )
 
-        Timer(1, Event.create("ttl"), persist=True).register(self)
+        # Timer(1, Event.create("ttl"), persist=True, channel=self.channel).register(self)
 
     def ttl(self):
         for k, rrs in self.cache.items()[:]:
@@ -128,9 +128,15 @@ class Server(Component):
                 )
             )
 
-            rr = [RR(qname, rdata=A(self.hosts[key]))]
             reply = request.reply()
-            reply.add_answer(*rr)
+            for rdata in self.hosts[key]:
+                rr = RR(
+                    qname,
+                    rclass=CLASS.IN,
+                    rtype=QTYPE.AAAA if ":" in rdata else QTYPE.A,
+                    rdata=AAAA(rdata) if ":" in rdata else A(rdata)
+                )
+                reply.add_answer(rr)
 
             self.cache[key] = rr
 
@@ -261,7 +267,7 @@ def setup_logging(args):
     return getLogger(__name__)
 
 
-def parse_args():
+def parse_args(args=None):
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         version=__version__,
@@ -334,11 +340,11 @@ def parse_args():
         help="DNS server to forward to"
     )
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def parse_hosts(filename):
-    hosts = {}
+    hosts = defaultdict(list)
 
     if path.exists(filename):
         with open(filename, "r") as f:
@@ -352,7 +358,7 @@ def parse_hosts(filename):
                     if not label.endswith("."):
                         label = "{0:s}.".format(label)
                     key = (label, QTYPE.A, CLASS.IN)
-                    hosts[key] = rdata
+                    hosts[key].append(rdata)
 
     return hosts
 

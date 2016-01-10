@@ -1,0 +1,9 @@
+[run]
+omit = udns/__init__.py
+       tests/*
+
+[html]
+directory = coverage
+
+[xml]
+output = coverage.xml

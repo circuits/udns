@@ -3,4 +3,7 @@ dist
 build
 *.pyc
 zones
+.cache
+coverage
+.coverage
 *.egg-info

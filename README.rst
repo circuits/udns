@@ -5,12 +5,24 @@
 .. _Docker Compose: https://docs.docker.com/compose/
 
 
-udns
-====
+udns - a micro (µ) DNS Server
+=============================
 
 .. image:: https://badge.waffle.io/prologic/udns.png?label=ready&title=Ready 
    :target: https://waffle.io/prologic/udns
    :alt: 'Stories in Ready'
+
+.. image:: https://travis-ci.org/prologic/udns.svg
+   :target: https://travis-ci.org/prologic/udns
+   :alt: Build Status
+
+.. image:: https://coveralls.io/repos/prologic/udns/badge.svg
+   :target: https://coveralls.io/r/prologic/udns
+   :alt: Coverage
+
+.. image:: https://landscape.io/github/prologic/udns/master/landscape.png
+   :target: https://landscape.io/github/prologic/udns/master
+   :alt: Quality
 
 udns is an authoritative, caching DNS server for development and small
 deployments written in `Python`_ using the `circuits`_ Application Framework
