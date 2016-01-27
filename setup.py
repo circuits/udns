@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="udns",
-    version="0.0.1",
+    version="0.0.2",
     description="micro dns server",
     long_description="{0:s}\n\n{1:s}".format(
         open("README.rst").read(), open("CHANGES.rst").read()
