@@ -36,13 +36,13 @@ setup(
     include_package_data=True,
     scripts=glob("bin/*"),
     dependency_links=[
-        "https://github.com/kiddouk/redisco/archive/master.zip#egg=redisco-0.2.4"  # noqa
+        "https://github.com/kiddouk/redisco/archive/master.zip#egg=redisco-0.2.9"  # noqa
     ],
     install_requires=(
-        "circuits==3.0",
-        "dnslib==0.9.3",
-        "redisco==0.2.4",
-        "cachetools==0.4.0",
+        "redisco==0.2.9",
+        "cachetools",
+        "circuits",
+        "dnslib",
     ),
     entry_points={
         "console_scripts": [

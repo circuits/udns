@@ -1,15 +1,17 @@
-# Dockaer Image for udns
-
-FROM crux/python
+FROM prologic/python-runtime:2.7
 MAINTAINER James Mills, prologic at shortcircuit dot net dot au
 
-# Services
 EXPOSE 53/udp
 
-# Startup
-CMD ["udnsd"]
+ENTRYPOINT ["udnsd"]
+CMD []
 
-# Application
+RUN apk -U add build-base python-dev linux-headers git && \
+    rm -rf /var/cache/apk/*
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt && rm /tmp/requirements.txt
+
 WORKDIR /app
-ADD . /app
-RUN python setup.py install
+COPY . /app/
+RUN pip install .
