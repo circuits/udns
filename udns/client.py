@@ -9,7 +9,6 @@
 from __future__ import print_function
 
 
-from os import environ
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
 from code import InteractiveConsole
 
@@ -20,6 +19,7 @@ from redisco import connection_setup
 
 
 from .models import Zone
+from .utils import getenv
 from . import __version__
 
 
@@ -115,14 +115,19 @@ def parse_args():
 
     parser.add_argument(
         "--dbhost", action="store",
-        default=environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost"),
+        default=getenv("REDIS_PORT_6379_TCP_ADDR", "DBHOST", default="udnsdb"),
         dest="dbhost", metavar="HOST", type=str,
         help="set database host to HOST (Redis)"
     )
 
     parser.add_argument(
         "--dbport", action="store",
-        default=int(environ.get("REDIS_PORT_6379_TCP_PORT", "6379")),
+        default=int(
+            getenv(
+                "REDIS_PORT_6379_TCP_PORT", "DBPORT",
+                default="6379"
+            )
+        ),
         dest="dbport", metavar="PORT", type=int,
         help="set database port to PORT (Redis)"
     )

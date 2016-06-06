@@ -5,8 +5,8 @@ from __future__ import print_function
 
 
 import logging
+from os import path
 from time import sleep
-from os import environ, path
 from logging import getLogger
 from collections import defaultdict
 from socket import AF_INET, SOCK_STREAM, socket
@@ -21,12 +21,13 @@ from dnslib import A, AAAA, CLASS, QR, QTYPE, RR
 from circuits.app import Daemon
 from circuits.net.events import write
 from circuits.net.sockets import UDPServer
-from circuits import Component, Debugger, Event, Timer
+from circuits import Component, Debugger, Event
 
 from redisco import connection_setup, get_client
 
 
 from . import __version__
+from .utils import getenv
 from .models import Record
 
 
@@ -301,21 +302,26 @@ def parse_args(args=None):
 
     add(
         "--dbhost", action="store",
-        default=environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost"),
+        default=getenv("REDIS_PORT_6379_TCP_ADDR", "DBHOST", default="udnsdb"),
         dest="dbhost", metavar="HOST", type=str,
         help="set database host to HOST (Redis)"
     )
 
     add(
         "--dbport", action="store",
-        default=int(environ.get("REDIS_PORT_6379_TCP_PORT", "6379")),
+        default=int(
+            getenv(
+                "REDIS_PORT_6379_TCP_PORT", "DBPORT",
+                default="6379"
+            )
+        ),
         dest="dbport", metavar="PORT", type=int,
         help="set database port to PORT (Redis)"
     )
 
     add(
         "--cachesize", action="store",
-        default=int(environ.get("CACHESIZEE", "1024")),
+        default=int(getenv("CACHESIZEE", default="1024")),
         dest="cachesize", metavar="SIZEe", type=int,
         help="set cache size to SIZE"
     )
