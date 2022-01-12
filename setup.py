@@ -40,7 +40,7 @@ setup(
     ],
     install_requires=(
         "circuits==3.0",
-        "dnslib==0.9.3",
+        "dnslib==0.9.17",
         "redisco==0.2.4",
         "cachetools==0.4.0",
     ),
